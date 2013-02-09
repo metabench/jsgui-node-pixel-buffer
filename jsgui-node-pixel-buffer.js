@@ -16,6 +16,9 @@
 // Will just have this as a pixel value buffer.
 //  Can have an image-buffer if its more advanced.
 
+if (typeof define !== 'function') {
+    var define = require('amdefine')(module);
+}
 
 
 
@@ -116,7 +119,7 @@ define(['jsgui-lang-essentials'],
                     var arr_pixel = a[3];
                     if (this.bits_per_pixel == 24) {
                         if (arr_pixel.length != 3) {
-                            throw 'Expected pixel value in format [r, g, b] for 24 bits_per_pixel.;
+                            throw 'Expected pixel value in format [r, g, b] for 24 bits_per_pixel.';
                         }
                         r = arr_pixel[0];
                         g = arr_pixel[1];
@@ -124,7 +127,7 @@ define(['jsgui-lang-essentials'],
                     }
                     if (this.bits_per_pixel == 32) {
                         if (arr_pixel.length != 4) {
-                            throw 'Expected pixel value in format [r, g, b, a] for 32 bits_per_pixel.;
+                            throw 'Expected pixel value in format [r, g, b, a] for 32 bits_per_pixel.';
                         }
                         r = arr_pixel[0];
                         g = arr_pixel[1];
@@ -136,7 +139,7 @@ define(['jsgui-lang-essentials'],
                 
                 if (l == 5) {
                     if (this.bits_per_pixel != 24) {
-                        throw 'Must specify the pixel as r, g, b with bits_per_pixel of 24'
+                        throw 'Must specify the pixel as r, g, b with bits_per_pixel of 24';
                     }
                     x = a[0];
                     y = a[1];
@@ -147,7 +150,7 @@ define(['jsgui-lang-essentials'],
                 
                 if (l == 6) {
                     if (this.bits_per_pixel != 32) {
-                        throw 'Must specify the pixel as r, g, b, a with bits_per_pixel of 32'
+                        throw 'Must specify the pixel as r, g, b, a with bits_per_pixel of 32';
                     }
                     x = a[0];
                     y = a[1];
