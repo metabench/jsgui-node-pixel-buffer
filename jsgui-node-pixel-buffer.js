@@ -19,16 +19,10 @@
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
-
-
-
-
 // Will be used to hold, and as the basis for basic processing on PNG images.
 
 define(['jsgui-lang-essentials'], 
-    
     // can use bit depth constants.
-    
     // bits_per_pixel
     
     // These will only operate as rgb24 or argb 32.
@@ -42,8 +36,6 @@ define(['jsgui-lang-essentials'],
             
             // want to be able to load the values into this rapidly?
             
-            
-        
             'init': function(spec) {
                 // size [width, height]
                 //var bytes_per_pixel;
@@ -61,6 +53,8 @@ define(['jsgui-lang-essentials'],
                 if (spec.bits_per_pixel) {
                     if (spec.bits_per_pixel != 24 && spec.bits_per_pixel != 32) {
                         throw 'Invalid bits_per_pixel value of ' + spec.bits_per_pixel + ', must be 24 or 32, default is 32.';
+                    } else {
+                        this.bits_per_pixel = spec.bits_per_pixel;
                     }
                 }
                 
@@ -82,7 +76,6 @@ define(['jsgui-lang-essentials'],
                 var buffer = this.buffer;
                 var r, g, b, a;
                 
-                
                 if (this.bits_per_pixel == 24) {
                     r = buffer.readUInt8(pixel_buffer_pos);
                     g = buffer.readUInt8(pixel_buffer_pos + 1);
@@ -95,9 +88,13 @@ define(['jsgui-lang-essentials'],
                     a = buffer.readUInt8(pixel_buffer_pos + 3);
                     return [r, g, b, a];
                 } else {
+                    var stack = new Error().stack;
+                    console.log(stack);
                     throw 'Must have bits_per_pixel set to 24 or 32';
                 }
             },
+            
+            // will take the r,g,b(,a) in params.
             'set_pixel': fp(function(a, sig) {
                 var bytes_per_pixel = this.bits_per_pixel / 8;
                 var l = a.l;
@@ -106,7 +103,13 @@ define(['jsgui-lang-essentials'],
                 
                 // [x, y], r, g, b, a
                 // [x, y], r, g, b
+                //console.log('set_pixel sig ' + sig);
+                //console.log('set_pixel a ' + stringify(a));
                 
+                
+                // [x, y], [r, g, b, a]
+                // [x, y], [r, g, b]
+
                 var x, y, r, g, b, alpha;
                 
                 var w = this.size[0];
@@ -116,9 +119,11 @@ define(['jsgui-lang-essentials'],
                 if (l == 3) {
                     x = a[0];
                     y = a[1];
-                    var arr_pixel = a[3];
+                    var arr_pixel = a[2];
                     if (this.bits_per_pixel == 24) {
                         if (arr_pixel.length != 3) {
+                            var stack = new Error().stack;
+                            console.log(stack);
                             throw 'Expected pixel value in format [r, g, b] for 24 bits_per_pixel.';
                         }
                         r = arr_pixel[0];
@@ -126,7 +131,11 @@ define(['jsgui-lang-essentials'],
                         b = arr_pixel[2];
                     }
                     if (this.bits_per_pixel == 32) {
+                        //console.log('arr_pixel ' + stringify(arr_pixel));
                         if (arr_pixel.length != 4) {
+                            console.log('arr_pixel.length ' + arr_pixel.length);
+                            var stack = new Error().stack;
+                            console.log(stack);
                             throw 'Expected pixel value in format [r, g, b, a] for 32 bits_per_pixel.';
                         }
                         r = arr_pixel[0];
@@ -174,12 +183,68 @@ define(['jsgui-lang-essentials'],
                     buffer.writeUInt8(b, pixel_buffer_pos + 2);
                     buffer.writeUInt8(alpha, pixel_buffer_pos + 3);
                 } else {
+                    var stack = new Error().stack;
+                    console.log(stack);
                     throw 'Must have bits_per_pixel set to 24 or 32';
+                }
+            }),
+            
+            'place_image_from_pixel_buffer': function(pixel_buffer, dest_pos) {
+                // can do a fast copy.
+                //  or can do pixel iteration.
+                
+                // function to get a line from a buffer?
+                // will want to copy directly between them.
+                
+                // so for each line in the source, need to copy the line directly into the buffer.
+                //  that's if they are the same bits_per_pixel.
+                
+                // copying rgba to rgba or rgb to rgb should be fast.
+                //  direct copying is fastest.
+                var dest_buffer = this.buffer;
+                var source_buffer = pixel_buffer.buffer;
+                
+                //console.log('dest_pos ' + stringify(dest_pos));
+                
+                if (this.bits_per_pixel == 32 && pixel_buffer.bits_per_pixel == 32) {
+                    
+                    var dest_w = this.size[0];
+                    var dest_h = this.size[1];
+                    
+                    var dest_buffer_line_length = dest_w * 4;
+                    
+                    var source_w = pixel_buffer.size[0];
+                    var source_h = pixel_buffer.size[1];
+                    
+                    var source_buffer_line_length = source_w * 4;
+                    
+                    //console.log('source_w ' + source_w);
+                    //console.log('source_h ' + source_h);
+                    var source_buffer_line_start_pos, source_buffer_line_end_pos, dest_buffer_subline_start_pos, dest_buffer_start_offset;
+                    
+                    dest_buffer_start_offset = dest_pos[0] * 4;
+                        
+                    for (var y = 0; y < source_h; y++) {
+                        source_buffer_line_start_pos = y * source_buffer_line_length;
+                        source_buffer_line_end_pos = source_buffer_line_start_pos + source_buffer_line_length;
+                        
+                        dest_buffer_subline_start_pos = (y + dest_pos[1]) * dest_buffer_line_length;
+                        //var dest_buffer_subline_end_pos = dest_buffer_subline_start_pos + source_buffer_line_length;
+                        
+                        
+                        // buf.copy(targetBuffer, [targetStart], [sourceStart], [sourceEnd])
+                        
+                        source_buffer.copy(dest_buffer, dest_buffer_subline_start_pos + dest_buffer_start_offset, source_buffer_line_start_pos, source_buffer_line_end_pos);
+                        
+                    }
+                    
+                } else {
+                    throw 'not currently supported';
                 }
                 
                 
                 
-            })
+            }
             
             
         })
