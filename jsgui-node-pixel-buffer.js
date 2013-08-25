@@ -19,15 +19,34 @@
 if (typeof define !== 'function') {
     var define = require('amdefine')(module);
 }
+
 // Will be used to hold, and as the basis for basic processing on PNG images.
 
-define(['jsgui-lang-essentials'], 
+//  Also want to make some pixel buffer manipulation modules.
+// jsgui-node-pixel-buffer-manipulate (maybe not manipulate - could imply it changes data when it does not always?)
+//  filters
+//  masks? feature detection?
+
+// jsgui-node-pixel-buffer-filter
+// jsgui-node-pixel-buffer-processing
+
+// want to do convolutions on the pixel buffer
+
+
+
+
+
+
+
+define(['jsgui-lang-essentials', 'binding.node'], 
+    
     // can use bit depth constants.
+    
     // bits_per_pixel
     
     // These will only operate as rgb24 or argb 32.
     
-    function(jsgui) {
+    function(jsgui, cpp_mod) {
         var Class = jsgui.Class, each = jsgui.each, stringify = jsgui.stringify, fp = jsgui.fp;
         var tof = jsgui.tof;
         
@@ -67,14 +86,22 @@ define(['jsgui-lang-essentials'],
                     this.buffer = new Buffer(bytes_per_pixel * this.size[0] * this.size[1]);
                 }
                 
-                
+            },
+            'new_blank_same_size': function() {
+                var res = new Pixel_Buffer({
+                    'size': this.size,
+                    'bits_per_pixel': this.bits_per_pixel
+                });
+                res.buffer.fill(0);
+                return res;
             },
             'get_pixel': function(x, y) {
                 var bytes_per_pixel = this.bits_per_pixel / 8;
                 // will return [r, g, b] or [r, g, b, a];
-                var pixel_buffer_pos = bytes_per_pixel * (x + y * w);
+                var pixel_buffer_pos = bytes_per_pixel * (x + y * this.size[0]);
                 var buffer = this.buffer;
                 var r, g, b, a;
+                
                 
                 if (this.bits_per_pixel == 24) {
                     r = buffer.readUInt8(pixel_buffer_pos);
@@ -94,8 +121,14 @@ define(['jsgui-lang-essentials'],
                 }
             },
             
+            // Would be faster without fp.
+            //  this could slow this down a lot in terms of V8 speed.
             // will take the r,g,b(,a) in params.
             'set_pixel': fp(function(a, sig) {
+                // Could this whole thing be sped up with C++?
+
+
+
                 var bytes_per_pixel = this.bits_per_pixel / 8;
                 var l = a.l;
                 // x, y, r, g, b, a  l = 6
@@ -103,13 +136,10 @@ define(['jsgui-lang-essentials'],
                 
                 // [x, y], r, g, b, a
                 // [x, y], r, g, b
-                //console.log('set_pixel sig ' + sig);
-                //console.log('set_pixel a ' + stringify(a));
+                console.log('set_pixel sig ' + sig);
+                console.log('set_pixel a ' + stringify(a));
                 
                 
-                // [x, y], [r, g, b, a]
-                // [x, y], [r, g, b]
-
                 var x, y, r, g, b, alpha;
                 
                 var w = this.size[0];
@@ -205,7 +235,7 @@ define(['jsgui-lang-essentials'],
                 var source_buffer = pixel_buffer.buffer;
                 
                 //console.log('dest_pos ' + stringify(dest_pos));
-                
+                // It's also worth making RGB->RGBA and RGBA->RGB
                 if (this.bits_per_pixel == 32 && pixel_buffer.bits_per_pixel == 32) {
                     
                     var dest_w = this.size[0];
@@ -223,7 +253,13 @@ define(['jsgui-lang-essentials'],
                     var source_buffer_line_start_pos, source_buffer_line_end_pos, dest_buffer_subline_start_pos, dest_buffer_start_offset;
                     
                     dest_buffer_start_offset = dest_pos[0] * 4;
-                        
+
+                    // This algorithm could be sped up with C.
+
+                    cpp_mod.copy_rgba_pixel_buffer_to_rgba_pixel_buffer_region(source_buffer, source_buffer_line_length, dest_buffer, dest_buffer_line_length, dest_pos[0], dest_pos[1]);
+
+                    //throw 'stop';
+                    /*
                     for (var y = 0; y < source_h; y++) {
                         source_buffer_line_start_pos = y * source_buffer_line_length;
                         source_buffer_line_end_pos = source_buffer_line_start_pos + source_buffer_line_length;
@@ -237,6 +273,7 @@ define(['jsgui-lang-essentials'],
                         source_buffer.copy(dest_buffer, dest_buffer_subline_start_pos + dest_buffer_start_offset, source_buffer_line_start_pos, source_buffer_line_end_pos);
                         
                     }
+                    */
                     
                 } else {
                     throw 'not currently supported';

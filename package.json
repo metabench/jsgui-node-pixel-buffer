@@ -1,31 +1,24 @@
 {
-  "name": "jsgui-node-pixel-buffer",
-  "version": "0.4.0",
-  "main": "jsgui-node-pixel-buffer.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/metabench/jsgui-node-pixel-buffer"
-  },
-  "keywords": [
-    "pixel",
-    "buffer",
-    "image",
-    "jsgui"
-  ],
-  "dependencies" : {
-    "jsgui-lang-essentials" :  "0.4.x",
-    "amdefine": ">=0.0.4"
-  },
-  "author": "James Vickers <james@metabench.com>",
-  "description": "jsgui - Simple pixel buffer for node.js. Supports rgb 24 bits per pixel and rgba 32 bits per pixel. Has get_pixel and set_pixel interface.",
-  "contributors": [ 
-    {
-      "name": "James Vickers",
-      "email": "james@metabench.com"
-    } 
-  ],
-  "license": "MIT"
+    "name": "jsgui-node-pixel-buffer",
+    "version": "0.4.2",
+    "main": "jsgui-node-pixel-buffer.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/metabench/jsgui-node-pixel-buffer"
+    },
+    "keywords": ["pixel", "buffer", "image", "jsgui"],
+    "dependencies": {
+        "jsgui-lang-essentials": "0.4.x",
+        "amdefine": ">=0.0.4"
+    },
+    "author": "James Vickers <james@metabench.com>",
+    "description": "jsgui - Simple pixel buffer for node.js. Supports rgb 24 bits per pixel and rgba 32 bits per pixel. Has get_pixel and set_pixel interface.",
+    "contributors": [{
+        "name": "James Vickers",
+        "email": "james@metabench.com"
+    }],
+    "license": "MIT"
 }
