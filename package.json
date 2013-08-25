@@ -1,6 +1,6 @@
 {
     "name": "jsgui-node-pixel-buffer",
-    "version": "0.4.2",
+    "version": "0.4.32",
     "main": "jsgui-node-pixel-buffer.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"

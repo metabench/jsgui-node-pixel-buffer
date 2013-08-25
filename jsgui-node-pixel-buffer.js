@@ -38,7 +38,7 @@ if (typeof define !== 'function') {
 
 
 
-define(['jsgui-lang-essentials', 'binding.node'], 
+define(["jsgui-lang-essentials", "./build/Release/binding.node"], 
     
     // can use bit depth constants.
     
